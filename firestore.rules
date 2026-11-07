@@ -51,7 +51,7 @@ service cloud.firestore {
       allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
       allow create, update: if signedIn() && (
         (request.auth.uid == uid && request.resource.data.uid == uid
-          && request.resource.data.keys().hasOnly(['uid','name','email','lastMessage','lastAt','unreadAdmin','unreadUser','status','topic']))
+          && request.resource.data.keys().hasOnly(['uid','name','email','lastMessage','lastAt','unreadAdmin','unreadUser','unreadCount','status','topic']))
         || isAdmin());
       allow delete: if isAdmin();
       match /messages/{mid} {

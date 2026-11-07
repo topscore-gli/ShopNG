@@ -85,13 +85,13 @@ if (!enabled) {
   FB.sendChat = async (text, type, orderId) => {
     const u = FB.user; if (!u) throw new Error("Please sign in first.");
     const b = writeBatch(db);
-    b.set(doc(db, "chats", u.uid), { uid: u.uid, name: u.displayName || "Customer", email: u.email || "", lastMessage: text.slice(0, 120), lastAt: serverTimestamp(), unreadAdmin: true, unreadUser: false, status: "open", topic: type === "issue" ? "issue" : "chat" }, { merge: true });
+    b.set(doc(db, "chats", u.uid), { uid: u.uid, name: u.displayName || "Customer", email: u.email || "", lastMessage: text.slice(0, 120), lastAt: serverTimestamp(), unreadAdmin: true, unreadUser: false, unreadCount: 0, status: "open", topic: type === "issue" ? "issue" : "chat" }, { merge: true });
     const m = { from: "user", text, type: type === "issue" ? "issue" : "chat", createdAt: serverTimestamp() };
     if (orderId) m.orderId = String(orderId).slice(0, 30);
     b.set(doc(collection(db, "chats", u.uid, "messages")), m);
     await b.commit();
   };
-  FB.markChatRead = () => FB.user ? setDoc(doc(db, "chats", FB.user.uid), { uid: FB.user.uid, unreadUser: false }, { merge: true }).catch(() => {}) : null;
+  FB.markChatRead = () => FB.user ? setDoc(doc(db, "chats", FB.user.uid), { uid: FB.user.uid, unreadUser: false, unreadCount: 0 }, { merge: true }).catch(() => {}) : null;
   FB.watchMyOrders = cb => {
     if (FB.unsubOrders) FB.unsubOrders();
     if (!FB.user) { cb([]); return; }

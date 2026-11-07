@@ -91,3 +91,11 @@ Admin → **Coupons**: create percent-off, fixed-amount or free-delivery codes w
 
 ### Works on every device
 Phones, tablets, laptops and big monitors: the layout adapts (multi-column product grids, two-column product page on laptops, centered dialogs). The site can also be **installed like an app** (Add to Home Screen / Install) thanks to `manifest.json`.
+
+---
+## Latest update notes
+- The top bar is now pinned to the screen on every page.
+- The category arrow (next to the first category icons) slides the full category list down; tap again to collapse.
+- A pink **+1 / +2 …** badge appears on the **Profile** icon of the bottom bar when support replies; it clears when the customer opens the chat. Replies also arrive as a phone notification ("ShopNG Support") when the customer has turned notifications on.
+- Re-deploy because rules + functions changed: `firebase deploy --only functions,firestore:rules,storage`
+- The stylesheet is now `glass.v6.css` — delete the older `glass.v5.css` from your repo.

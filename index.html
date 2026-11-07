@@ -16,7 +16,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
     <link rel="stylesheet" href="./style.css?v=3">
-    <link rel="stylesheet" href="./glass.v5.css">
+    <link rel="stylesheet" href="./glass.v6.css">
 </head>
 <body>
             <div class="app-container">
@@ -103,15 +103,11 @@
             </section>
 
             <section class="categories-section">
-                <div class="section-header">
-                    <h2 class="section-title">Shop by Category</h2>
-                    <button class="section-link" onclick="navigateTo('categories')">See All <i class="fas fa-chevron-right"></i></button>
-                </div>
-                <div class="cat-wrap">
+                <div class="cat-wrap" id="catWrap">
                     <div class="categories-scroll" id="homeCategories">
                         <!-- Rendered by JS -->
                     </div>
-                    <span class="cat-fade" id="catFade" aria-hidden="true"><i class="fas fa-chevron-right"></i></span>
+                    <button class="cat-more" id="catFade" onclick="toggleCats()" aria-label="Show all categories" aria-expanded="false"><i class="fas fa-chevron-down"></i></button>
                 </div>
             </section>
 
@@ -505,6 +501,7 @@
                 <span>Orders</span>
             </button>
             <button class="nav-item" id="nav-profile" onclick="navigateTo('profile')">
+                <span class="nav-badge" id="profileBadge" style="display:none;"></span>
                 <i class="fas fa-user"></i>
                 <span>Profile</span>
             </button>

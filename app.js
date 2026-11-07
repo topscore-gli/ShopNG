@@ -241,11 +241,8 @@ function renderHome() {
                 <span class="category-name">${cat.name}</span>
             </button>
         `).join('');
-        if (!window._catNudged && categories.length > 4) {
-            window._catNudged = true;
-            setTimeout(() => { catContainer.scrollTo({ left: 120, behavior: 'smooth' }); setTimeout(() => catContainer.scrollTo({ left: 0, behavior: 'smooth' }), 900); }, 700);
-        }
-        if (!catContainer._hinted) { catContainer._hinted = true; catContainer.addEventListener('scroll', () => { const f = document.getElementById('catFade'); if (f) f.style.opacity = (catContainer.scrollLeft + catContainer.clientWidth >= catContainer.scrollWidth - 8) ? '0' : '1'; }, { passive: true }); }
+        const more = document.getElementById('catFade');
+        if (more) more.style.display = categories.length > 4 ? '' : 'none';
     }
     const featured = products.filter(p => p.isFeatured);
     const featList = (featured.length ? featured : products).slice(0, 6);
@@ -995,6 +992,14 @@ function liveSearch(input) {
 }
 document.addEventListener('click', e => { if (!e.target.closest('.suggest-box, #homeSearchInput')) hideSuggest(); });
 
+function updateChatBadge(n) {
+    AppState.chatUnread = n;
+    const txt = n > 0 ? '+' + (n > 99 ? '99' : n) : '';
+    const pb = document.getElementById('profileBadge');
+    if (pb) { pb.textContent = txt; pb.style.display = n > 0 ? '' : 'none'; }
+    document.querySelectorAll('.chat-dot').forEach(d => { d.textContent = txt; d.style.display = n > 0 ? '' : 'none'; });
+}
+
 // ---------- Support chat ----------
 let chatUnsub = null, chatMetaUnsub = null, chatTag = '';
 function renderChat(topic) {
@@ -1011,6 +1016,7 @@ function renderChat(topic) {
         box.innerHTML = list.length ? list.map(m => `<div class="cmsg ${m.from === 'user' ? 'me' : ''}"><div>${esc(m.text).replace(/\n/g, '<br>')}</div><small>${m.type === 'issue' ? '⚠ Issue · ' : ''}${m.orderId ? esc(m.orderId) + ' · ' : ''}${m.from === 'admin' ? 'Support · ' : ''}${new Date(m.date).toLocaleString([], { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</small></div>`).join('')
             : '<div class="empty-state"><div class="empty-state-icon"><i class="fas fa-comments"></i></div><h3>How can we help?</h3><p>Send us a message or pick a topic below to report an issue.</p></div>';
         box.scrollTop = box.scrollHeight;
+        if (list.length && list[list.length - 1].from === 'admin') FB.markChatRead();
     });
     FB.markChatRead();
 }
@@ -1026,7 +1032,7 @@ async function sendChat() {
     const order = chatTag ? (document.getElementById('chatOrder')?.value || '') : '';
     if (chatTag) text = `[${chatTag}] ` + text;
     btn.disabled = true;
-    try { await FB.sendChat(text, chatTag ? 'issue' : 'chat', order); inp.value = ''; }
+    try { await FB.sendChat(text, chatTag ? 'issue' : 'chat', order); inp.value = ''; setTimeout(() => maybeAskPush('chat'), 800); }
     catch (e) { showToast('Could not send', esc(e && e.message ? e.message : 'Try again.'), 'error'); }
     btn.disabled = false;
 }
@@ -1092,7 +1098,8 @@ function handleUser(u) {
         FB.syncPush && FB.syncPush('user'); setTimeout(maybeAskPush, 3000);
     } else { AppState.orders = []; if (AppState.currentPage === 'orders') renderOrders(); }
     if (chatMetaUnsub) { chatMetaUnsub(); chatMetaUnsub = null; }
-    if (u) chatMetaUnsub = FB.watchChatMeta(m => { AppState.chatUnread = !!(m && m.unreadUser); document.querySelectorAll('.chat-dot').forEach(d => d.style.display = AppState.chatUnread ? '' : 'none'); });
+    if (u) chatMetaUnsub = FB.watchChatMeta(m => updateChatBadge(m ? (typeof m.unreadCount === 'number' ? m.unreadCount : (m.unreadUser ? 1 : 0)) : 0));
+    else updateChatBadge(0);
     if (AppState.currentPage === 'profile') renderProfile();
 }
 
@@ -1116,6 +1123,14 @@ async function initApp() {
     else if (open === 'chat' || open === 'orders') navigateTo(open);
     else navigateTo('home');
     if (qs.has('p') || qs.has('open')) history.replaceState(null, '', location.pathname);
+}
+
+function toggleCats() {
+    const w = document.getElementById('catWrap'), b = document.getElementById('catFade');
+    if (!w) return;
+    const open = w.classList.toggle('expanded');
+    if (b) b.setAttribute('aria-expanded', open ? 'true' : 'false');
+    document.getElementById('homeCategories').scrollLeft = 0;
 }
 
 // ---------- Coupons ----------
@@ -1158,13 +1173,17 @@ async function togglePush() {
     } catch (e) { showToast('Notifications', esc(e && e.message ? e.message : 'Could not enable.'), 'error', 5000); }
     updatePushUI();
 }
-async function maybeAskPush() {
-    if (!(window.FB && FB.enabled && FB.user) || localStorage.getItem('pushAsked')) return;
+async function maybeAskPush(reason) {
+    if (!(window.FB && FB.enabled && FB.user)) return;
+    const key = reason === 'chat' ? 'pushAskedChat' : 'pushAsked';
+    if (localStorage.getItem(key) || document.querySelector('.push-banner')) return;
     if ((await FB.pushStatus()) !== 'off' || Notification.permission !== 'default') return;
     const b = document.createElement('div'); b.className = 'push-banner';
-    b.innerHTML = '<div class="pb-icon"><i class="fas fa-bell"></i></div><div class="pb-text"><b>Never miss a deal</b><span>Get alerts for new products, order updates and support replies.</span></div><div class="pb-actions"><button class="pb-yes">Turn on</button><button class="pb-no">Later</button></div>';
+    b.innerHTML = reason === 'chat'
+        ? '<div class="pb-icon"><i class="fas fa-comment-dots"></i></div><div class="pb-text"><b>Get support replies on your phone</b><span>We\'ll notify you like a normal message when support answers.</span></div><div class="pb-actions"><button class="pb-yes">Turn on</button><button class="pb-no">Later</button></div>'
+        : '<div class="pb-icon"><i class="fas fa-bell"></i></div><div class="pb-text"><b>Never miss a deal</b><span>Get alerts for new products, order updates and support replies.</span></div><div class="pb-actions"><button class="pb-yes">Turn on</button><button class="pb-no">Later</button></div>';
     document.body.appendChild(b);
-    const close = () => { localStorage.setItem('pushAsked', '1'); b.remove(); };
+    const close = () => { localStorage.setItem(key, '1'); b.remove(); };
     b.querySelector('.pb-no').onclick = close;
     b.querySelector('.pb-yes').onclick = async () => { close(); await togglePush(); };
 }

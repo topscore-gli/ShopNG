@@ -2,7 +2,7 @@ import { enabled, CFG, app, auth, db, storage, functions } from "./fb-core.js";
 import { getMessaging, getToken, onMessage, isSupported } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging.js";
 import { httpsCallable } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-functions.js";
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut, GoogleAuthProvider, signInWithPopup, sendEmailVerification, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-import { collection, doc, setDoc, updateDoc, deleteDoc, onSnapshot, serverTimestamp, writeBatch, query, orderBy, Timestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import { collection, doc, setDoc, updateDoc, deleteDoc, onSnapshot, serverTimestamp, writeBatch, query, orderBy, Timestamp, increment } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js";
 
 const $ = s => document.querySelector(s);
@@ -168,7 +168,7 @@ async function sendReply(uid) {
   el.value = "";
   try {
     const b = writeBatch(db);
-    b.set(doc(db, "chats", uid), { unreadUser: true, unreadAdmin: false, lastMessage: "You: " + text.slice(0, 110), lastAt: serverTimestamp(), status: "open" }, { merge: true });
+    b.set(doc(db, "chats", uid), { unreadUser: true, unreadCount: increment(1), unreadAdmin: false, lastMessage: "You: " + text.slice(0, 110), lastAt: serverTimestamp(), status: "open" }, { merge: true });
     b.set(doc(collection(db, "chats", uid, "messages")), { from: "admin", text, type: "chat", createdAt: serverTimestamp() });
     await b.commit();
   } catch (e) { toast("Could not send: " + e.code, "err"); el.value = text; }
