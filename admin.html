@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0b0818">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.gstatic.com https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' https: data: blob:; connect-src https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://*.cloudfunctions.net; frame-src https://*.firebaseapp.com https://accounts.google.com; object-src 'none'; base-uri 'self'; form-action 'self'">
+<title>ShopNG Admin</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="./admin.css">
+</head>
+<body>
+<div id="gate" class="gate"></div>
+<div id="app" class="app" hidden>
+  <header class="top"><div class="brand"><i class="fas fa-gem"></i> ShopNG <span>Admin</span></div>
+    <div class="who"><button class="btn ghost sm" id="bell" data-act="alerts"><i class="fas fa-bell-slash"></i> Enable alerts</button><span id="whoEmail"></span><button class="btn ghost sm" data-act="signout"><i class="fas fa-sign-out-alt"></i></button></div></header>
+  <nav class="tabs" id="tabs">
+    <button data-tab="overview" class="on"><i class="fas fa-chart-pie"></i>Overview</button>
+    <button data-tab="products"><i class="fas fa-box-open"></i>Products</button>
+    <button data-tab="orders"><i class="fas fa-receipt"></i>Orders</button>
+    <button data-tab="customers"><i class="fas fa-users"></i>Customers</button>
+    <button data-tab="categories"><i class="fas fa-tags"></i>Categories</button>
+    <button data-tab="flash"><i class="fas fa-bolt"></i>Flash Sale</button>
+    <button data-tab="banners"><i class="fas fa-image"></i>Banners</button>
+    <button data-tab="coupons"><i class="fas fa-ticket-alt"></i>Coupons</button>
+    <button data-tab="support"><i class="fas fa-headset"></i>Support <b id="supBadge" class="dotb" hidden>0</b></button>
+  </nav>
+  <main id="view"></main>
+</div>
+<div class="modal" id="modal" hidden><div class="sheet" id="sheet"></div></div>
+<div class="toasts" id="toasts"></div>
+<script src="./firebase-config.js"></script>
+<script src="./products.js"></script>
+<script type="module" src="./admin.js"></script>
+</body>
+</html>

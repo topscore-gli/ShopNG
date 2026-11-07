@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#c4b2ea">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="apple-touch-icon" href="./images/icon-192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="ShopNG">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://apis.google.com https://js.paystack.co https://*.paystack.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://*.paystack.com https://*.paystack.co; font-src https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' https: data: blob:; connect-src https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://*.cloudfunctions.net https://*.paystack.co https://*.paystack.com; frame-src https://*.paystack.com https://*.paystack.co https://*.firebaseapp.com https://accounts.google.com; object-src 'none'; base-uri 'self'">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <title>ShopNG</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+    <link rel="stylesheet" href="./style.css?v=3">
+    <link rel="stylesheet" href="./glass.v5.css">
+</head>
+<body>
+            <div class="app-container">
+        <!-- Toast Container -->
+        <div class="toast-container" id="toastContainer"></div>
+
+        <!-- ============================================
+             HOME PAGE
+             ============================================ -->
+        <div class="page active" id="page-home">
+            <header class="app-header">
+                <div class="header-left">
+                    <button class="menu-btn" onclick="navigateTo('notifications')">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="greeting">
+                        <h1>Hello, <span id="greetName">there</span> <span style="font-size:1.1rem;">👋</span></h1>
+                        <p>What are you looking for today?</p>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <div class="cart-btn-wrap">
+                        <button class="cart-btn" onclick="navigateTo('cart')">
+                            <i class="fas fa-shopping-cart"></i>
+                        </button>
+                        <span class="cart-badge" style="display:none;">0</span>
+                    </div>
+                </div>
+            </header>
+
+            <section class="search-section">
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" placeholder="Search for products, brands..." id="homeSearchInput" onkeypress="handleSearch(event)" oninput="liveSearch(this)" autocomplete="off">
+                </div>
+                <button class="filter-btn" onclick="navigateTo('search')">
+                    <i class="fas fa-sliders-h"></i>
+                </button>
+            </section>
+
+            <section class="promo-section">
+                <div class="promo-carousel">
+                    <div class="promo-slides" id="promoSlides">
+                        <div class="promo-slide">
+                            <div class="promo-content">
+                                <div class="promo-label">FASHION</div>
+                                <div class="promo-title">Style That<br><span>Pops</span></div>
+                                <div class="promo-subtitle">Bold hoodies &amp; everyday wear<br>for every mood.</div>
+                                <button class="promo-btn" onclick="shopCategory('Fashion')">Shop Fashion <i class="fas fa-arrow-right"></i></button>
+                            </div>
+                            <div class="promo-image">
+                                <img class="promo-img" src="./images/hero-fashion.webp" width="612" height="408" alt="Colourful hoodies and fashion" decoding="async">
+                            </div>
+                        </div>
+                        <div class="promo-slide">
+                            <div class="promo-content">
+                                <div class="promo-label">KICKS &amp; MORE</div>
+                                <div class="promo-title">Step Into<br><span>Fresh Style</span></div>
+                                <div class="promo-subtitle">Sneakers, bags &amp; accessories<br>delivered fast.</div>
+                                <button class="promo-btn" onclick="shopCategory('Shoes')">Shop Shoes <i class="fas fa-arrow-right"></i></button>
+                            </div>
+                            <div class="promo-image">
+                                <img class="promo-img" src="./images/hero-shoes.webp" width="612" height="408" alt="Sneakers, shopping bags and accessories" decoding="async">
+                            </div>
+                        </div>
+                        <div class="promo-slide">
+                            <div class="promo-content">
+                                <div class="promo-label">NEW ARRIVALS</div>
+                                <div class="promo-title">Latest<br><span>Phones</span></div>
+                                <div class="promo-subtitle">iPhones, AirPods &amp; watches.<br>Pay securely.</div>
+                                <button class="promo-btn" onclick="shopCategory('Phones')">Shop Phones <i class="fas fa-arrow-right"></i></button>
+                            </div>
+                            <div class="promo-image">
+                                <img class="promo-img" src="./images/hero-phones.webp" width="612" height="408" alt="iPhones, AirPods and smart watches" decoding="async">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="promo-dots">
+                    <button class="promo-dot active" onclick="goToPromo(0)"></button>
+                    <button class="promo-dot" onclick="goToPromo(1)"></button>
+                    <button class="promo-dot" onclick="goToPromo(2)"></button>
+                </div>
+            </section>
+
+            <section class="categories-section">
+                <div class="section-header">
+                    <h2 class="section-title">Shop by Category</h2>
+                    <button class="section-link" onclick="navigateTo('categories')">See All <i class="fas fa-chevron-right"></i></button>
+                </div>
+                <div class="cat-wrap">
+                    <div class="categories-scroll" id="homeCategories">
+                        <!-- Rendered by JS -->
+                    </div>
+                    <span class="cat-fade" id="catFade" aria-hidden="true"><i class="fas fa-chevron-right"></i></span>
+                </div>
+            </section>
+
+            <section class="products-section">
+                <div class="section-header">
+                    <h2 class="section-title">Featured Products</h2>
+                    <button class="section-link" onclick="navigateTo('categories')">See All <i class="fas fa-chevron-right"></i></button>
+                </div>
+                <div class="products-grid" id="homeFeatured">
+                    <!-- Rendered by JS -->
+                </div>
+            </section>
+
+            <section class="flash-section" id="flashSection">
+                <div class="flash-header">
+                    <div class="flash-title">
+                        <i class="fas fa-bolt"></i>
+                        <h2>Flash Sale</h2>
+                    </div>
+                    <div class="countdown">
+                        <div class="countdown-box" id="flashHours">04</div>
+                        <span class="countdown-sep">:</span>
+                        <div class="countdown-box" id="flashMinutes">32</div>
+                        <span class="countdown-sep">:</span>
+                        <div class="countdown-box" id="flashSeconds">15</div>
+                    </div>
+                </div>
+                <div class="flash-scroll" id="homeFlash">
+                    <!-- Rendered by JS -->
+                </div>
+            </section>
+
+            <section class="products-section">
+                <div class="section-header">
+                    <h2 class="section-title">Recommended for You</h2>
+                </div>
+                <div class="products-grid" id="homeRecommended">
+                    <!-- Rendered by JS -->
+                </div>
+            </section>
+
+            <section class="products-section hidden" id="recentSection">
+                <div class="section-header">
+                    <h2 class="section-title">Recently Viewed</h2>
+                </div>
+                <div class="products-grid" id="homeRecent">
+                    <!-- Rendered by JS -->
+                </div>
+            </section>
+        </div>
+
+        <!-- ============================================
+             CATEGORIES PAGE
+             ============================================ -->
+        <div class="page" id="page-categories">
+            <header class="app-header">
+                <div class="header-left">
+                    <button class="menu-btn" onclick="navigateTo('home')">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <div class="greeting">
+                        <h1>Categories</h1>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <div class="cart-btn-wrap">
+                        <button class="cart-btn" onclick="navigateTo('cart')">
+                            <i class="fas fa-shopping-cart"></i>
+                        </button>
+                        <span class="cart-badge" style="display:none;">0</span>
+                    </div>
+                </div>
+            </header>
+
+            <section class="categories-section">
+                <div class="categories-scroll" id="catCategories">
+                    <!-- Rendered by JS -->
+                </div>
+            </section>
+
+            <section class="products-section">
+                <div class="products-grid" id="catProducts">
+                    <!-- Rendered by JS -->
+                </div>
+            </section>
+        </div>
+
+        <!-- ============================================
+             SEARCH PAGE
+             ============================================ -->
+        <div class="page" id="page-search">
+            <header class="app-header">
+                <div class="header-left" style="flex:1;">
+                    <div class="search-bar" style="width:100%;">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Search for products, brands..." id="searchInput" onkeypress="handleSearch(event)" oninput="liveSearch(this)" autocomplete="off">
+                    </div>
+                </div>
+                <button class="menu-btn" style="margin-left:10px;" onclick="navigateTo('home')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </header>
+
+            <section class="search-filters">
+                <button class="filter-chip active" onclick="setSearchFilter(this, 'all')">All</button>
+                <button class="filter-chip" onclick="setSearchFilter(this, 'price-low')">Price: Low to High</button>
+                <button class="filter-chip" onclick="setSearchFilter(this, 'price-high')">Price: High to Low</button>
+                <button class="filter-chip" onclick="setSearchFilter(this, 'rating')">Top Rated</button>
+            </section>
+
+            <section id="searchResults" style="padding:0 20px;">
+                <!-- Rendered by JS -->
+            </section>
+        </div>
+
+        <!-- ============================================
+             PRODUCT DETAIL PAGE
+             ============================================ -->
+        <div class="page" id="page-product">
+            <div id="productDetail">
+                <!-- Rendered by JS -->
+            </div>
+        </div>
+
+        <!-- ============================================
+             CART PAGE
+             ============================================ -->
+        <div class="page" id="page-cart">
+            <header class="app-header">
+                <div class="header-left">
+                    <button class="menu-btn" onclick="navigateTo('home')">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <div class="greeting">
+                        <h1>My Cart</h1>
+                        <p id="cartCountText">0 items</p>
+                    </div>
+                </div>
+            </header>
+
+            <section style="padding: 0 20px;">
+                <div id="cartItems"></div>
+                <div id="cartSummary"></div>
+            </section>
+        </div>
+
+        <!-- ============================================
+             WISHLIST PAGE
+             ============================================ -->
+        <div class="page" id="page-wishlist">
+            <header class="app-header">
+                <div class="header-left">
+                    <button class="menu-btn" onclick="navigateTo('home')">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <div class="greeting">
+                        <h1>My Wishlist</h1>
+                        <p id="wishlistCountText">0 items saved</p>
+                    </div>
+                </div>
+            </header>
+
+            <section style="padding: 0 20px;">
+                <div id="wishlistItems"></div>
+            </section>
+        </div>
+
+        <!-- ============================================
+             CHECKOUT PAGE
+             ============================================ -->
+        <div class="page" id="page-checkout">
+            <header class="app-header">
+                <div class="header-left">
+                    <button class="menu-btn" onclick="navigateTo('cart')">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <div class="greeting">
+                        <h1>Checkout</h1>
+                    </div>
+                </div>
+            </header>
+
+            <section style="padding: 0 20px;">
+                <div id="checkoutContent"></div>
+            </section>
+        </div>
+
+        <!-- ============================================
+             ORDERS PAGE
+             ============================================ -->
+        <div class="page" id="page-orders">
+            <header class="app-header">
+                <div class="header-left">
+                    <button class="menu-btn" onclick="navigateTo('home')">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <div class="greeting">
+                        <h1>My Orders</h1>
+                        <p>Track your purchases</p>
+                    </div>
+                </div>
+            </header>
+
+            <section style="padding: 0 20px;">
+                <div id="ordersList"></div>
+            </section>
+        </div>
+
+        <!-- ============================================
+             PROFILE PAGE
+             ============================================ -->
+        <div class="page" id="page-profile">
+            <header class="app-header">
+                <div class="header-left">
+                    <button class="menu-btn" onclick="navigateTo('home')">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <div class="greeting">
+                        <h1>Profile</h1>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <button class="menu-btn" onclick="navigateTo('notifications')">
+                        <i class="fas fa-bell"></i>
+                    </button>
+                </div>
+            </header>
+
+            <div class="profile-header">
+                <div class="profile-avatar" id="profileAvatar">A</div>
+                <div class="profile-name" id="profileName">Guest</div>
+                <div class="profile-email" id="profileEmail">Sign in to save your orders</div>
+            </div>
+
+            <div class="profile-menu">
+                <button class="profile-menu-item" onclick="navigateTo('orders')">
+                    <i class="fas fa-box"></i>
+                    <span>My Orders</span>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+                <button class="profile-menu-item" onclick="navigateTo('wishlist')">
+                    <i class="fas fa-heart"></i>
+                    <span>Wishlist</span>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+                <button class="profile-menu-item" onclick="navigateTo('notifications')">
+                    <i class="fas fa-bell"></i>
+                    <span>Notifications</span>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+                <button class="profile-menu-item" onclick="navigateTo('chat')">
+                    <i class="fas fa-headset"></i>
+                    <span>Support Chat <b class="chat-dot" style="display:none;"></b></span>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+                <button class="profile-menu-item" onclick="navigateTo('chat',{topic:'issue'})">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span>Report an Issue</span>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+                <button class="profile-menu-item">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>Saved Addresses</span>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+                <button class="profile-menu-item">
+                    <i class="fas fa-credit-card"></i>
+                    <span>Payment Methods</span>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+                <button class="profile-menu-item" onclick="togglePush()">
+                    <i class="fas fa-bell"></i>
+                    <span>Push Notifications <small id="pushLabel" class="push-label">Off</small></span>
+                    <div class="toggle-switch" id="pushToggle"></div>
+                </button>
+                <button class="profile-menu-item" onclick="toggleTheme()">
+                    <i class="fas fa-moon"></i>
+                    <span>Dark Mode</span>
+                    <div class="toggle-switch" id="themeToggle"></div>
+                </button>
+                <button class="profile-menu-item">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+                <button class="profile-menu-item" onclick="authMenuClick()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span id="authMenuLabel">Sign In / Create Account</span>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- ============================================
+             NOTIFICATIONS PAGE
+             ============================================ -->
+        <div class="page" id="page-notifications">
+            <header class="app-header">
+                <div class="header-left">
+                    <button class="menu-btn" onclick="navigateTo('home')">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <div class="greeting">
+                        <h1>Notifications</h1>
+                    </div>
+                </div>
+            </header>
+
+            <section style="padding: 0 20px;">
+                <div id="notificationsList"></div>
+            </section>
+        </div>
+
+        <!-- ============================================
+             SUPPORT CHAT PAGE
+             ============================================ -->
+        <div class="page" id="page-chat">
+            <header class="app-header">
+                <div class="header-left">
+                    <button class="menu-btn" onclick="navigateTo('profile')"><i class="fas fa-arrow-left"></i></button>
+                    <div class="greeting"><h1>Support Chat</h1><p>We usually reply within a few hours</p></div>
+                </div>
+            </header>
+            <section class="chat-wrap">
+                <div class="chat-messages" id="chatMessages"></div>
+                <form class="chat-form" id="chatForm" onsubmit="sendChat();return false;">
+                    <div class="chat-tags" id="chatTags">
+                        <button type="button" data-tag="" class="active" onclick="setChatTag('')">💬 Chat</button>
+                        <button type="button" data-tag="Order issue" onclick="setChatTag('Order issue')">📦 Order</button>
+                        <button type="button" data-tag="Payment issue" onclick="setChatTag('Payment issue')">💳 Payment</button>
+                        <button type="button" data-tag="Delivery issue" onclick="setChatTag('Delivery issue')">🚚 Delivery</button>
+                        <button type="button" data-tag="Other problem" onclick="setChatTag('Other problem')">🐞 Other</button>
+                    </div>
+                    <select class="form-select" id="chatOrder" style="display:none;margin-bottom:8px;"></select>
+                    <div class="chat-input-row">
+                        <input class="form-input" id="chatInput" maxlength="900" placeholder="Type your message…" autocomplete="off">
+                        <button type="submit" class="chat-send" id="chatSend" aria-label="Send"><i class="fas fa-paper-plane"></i></button>
+                    </div>
+                </form>
+            </section>
+        </div>
+
+        <!-- ============================================
+             ACCOUNT / AUTH PAGE
+             ============================================ -->
+        <div class="page" id="page-auth">
+            <header class="app-header">
+                <div class="header-left">
+                    <button class="menu-btn" onclick="navigateTo('home')"><i class="fas fa-arrow-left"></i></button>
+                    <div class="greeting"><h1>Account</h1></div>
+                </div>
+            </header>
+            <section class="auth-wrap">
+                <div class="auth-card">
+                    <div class="auth-tabs">
+                        <button id="tabIn" class="active" onclick="setAuthMode('in')">Sign In</button>
+                        <button id="tabUp" onclick="setAuthMode('up')">Create Account</button>
+                    </div>
+                    <form id="authForm" onsubmit="return submitAuth(event)" novalidate>
+                        <div class="form-group" id="nameGroup" style="display:none;"><label class="form-label">Full name</label><input class="form-input" id="authName" autocomplete="name" maxlength="80"></div>
+                        <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input" id="authEmail" autocomplete="email" maxlength="120"></div>
+                        <div class="form-group"><label class="form-label">Password</label><input type="password" class="form-input" id="authPass" autocomplete="current-password" maxlength="100"></div>
+                        <p id="authMsg" class="auth-msg"></p>
+                        <button type="submit" class="neu-btn neu-btn-primary w-full" id="authSubmit">Sign In</button>
+                    </form>
+                    <button class="neu-btn neu-btn-secondary w-full" onclick="googleAuth()" style="margin-top:10px;"><i class="fab fa-google"></i> Continue with Google</button>
+                    <button class="auth-link" onclick="forgotPassword()">Forgot password?</button>
+                    <p class="auth-note"><i class="fas fa-lock"></i> Payments are processed securely by Paystack. We never see your card details.</p>
+                </div>
+            </section>
+        </div>
+
+        <!-- ============================================
+             BOTTOM NAVIGATION
+             ============================================ -->
+        <nav class="bottom-nav">
+            <button class="nav-item active" id="nav-home" onclick="navigateTo('home')">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </button>
+            <button class="nav-item" id="nav-categories" onclick="navigateTo('categories')">
+                <i class="fas fa-th-large"></i>
+                <span>Categories</span>
+            </button>
+            <button class="nav-item" id="nav-wishlist" onclick="navigateTo('wishlist')">
+                <i class="fas fa-heart"></i>
+                <span>Wishlist</span>
+            </button>
+            <button class="nav-item" id="nav-orders" onclick="navigateTo('orders')">
+                <i class="fas fa-shopping-bag"></i>
+                <span>Orders</span>
+            </button>
+            <button class="nav-item" id="nav-profile" onclick="navigateTo('profile')">
+                <i class="fas fa-user"></i>
+                <span>Profile</span>
+            </button>
+        </nav>
+
+        <!-- ============================================
+             MODALS
+             ============================================ -->
+        <div class="modal-overlay" id="orderDetailModal" onclick="if(event.target===this)closeModal('orderDetailModal')">
+            <div class="modal-drawer" id="orderDetailContent"></div>
+        </div>
+        <div class="modal-overlay" id="reviewModal" onclick="if(event.target===this)closeModal('reviewModal')">
+            <div class="modal-drawer" id="reviewContent"></div>
+        </div>
+
+    </div>
+
+    <script src="./firebase-config.js"></script>
+    <script src="https://js.paystack.co/v1/inline.js"></script>
+    <script src="./products.js"></script>
+    <script type="module" src="./fb-bridge.js"></script>
+    <script src="./app.js"></script>
+</body>
+</html>

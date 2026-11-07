@@ -1,0 +1,15 @@
+{
+  "name": "ShopNG",
+  "short_name": "ShopNG",
+  "description": "Shop fashion, phones, shoes and more with secure Paystack checkout.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#e2cdea",
+  "theme_color": "#c4b2ea",
+  "icons": [
+    { "src": "images/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "images/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "images/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

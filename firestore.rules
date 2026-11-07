@@ -1,0 +1,71 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // >>> CHANGE THIS to your own admin email(s). The email must be verified. <<<
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email in ['YOUR_ADMIN_EMAIL@gmail.com'];
+    }
+    function signedIn() { return request.auth != null; }
+
+    // Catalogue: anyone can browse, only the admin can change
+    match /products/{id}   { allow read: if true; allow write: if isAdmin(); }
+    match /categories/{id} { allow read: if true; allow write: if isAdmin(); }
+
+    // Customers: each user manages only their own profile; admin can read all
+    match /users/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
+      allow create: if signedIn() && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['name','email','phone','createdAt','lastLogin','lastOrderAt'])
+        && request.resource.data.email == request.auth.token.email;
+      allow update: if signedIn() && request.auth.uid == uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name','phone','lastLogin']);
+      allow delete: if false;
+    }
+
+    // Orders are created and paid ONLY by Cloud Functions (admin SDK bypasses these rules).
+    // Customers can read their own; admin can read all and update delivery status only.
+    match /orders/{id} {
+      allow read: if signedIn() && (resource.data.uid == request.auth.uid || isAdmin());
+      allow create, delete: if false;
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status','adminNote','updatedAt','paymentStatus'])
+        && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['paymentStatus'])
+            || (resource.data.paymentMethod == 'cod' && request.resource.data.paymentStatus in ['Pay on Delivery','Paid']));
+    }
+
+    // Flash-sale timer, homepage banners: public read, admin write
+    match /settings/{id} { allow read: if true; allow write: if isAdmin(); }
+    match /banners/{id}  { allow read: if true; allow write: if isAdmin(); }
+
+    // Coupons: admin only (customers validate through the validateCoupon function)
+    match /coupons/{code} { allow read, write: if isAdmin(); }
+
+    // Reviews are written ONLY by the submitReview Cloud Function (verified buyers). Admin can remove abusive ones.
+    match /reviews/{id} { allow read: if true; allow delete: if isAdmin(); allow create, update: if false; }
+
+    // Support chat: one thread per customer
+    match /chats/{uid} {
+      allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
+      allow create, update: if signedIn() && (
+        (request.auth.uid == uid && request.resource.data.uid == uid
+          && request.resource.data.keys().hasOnly(['uid','name','email','lastMessage','lastAt','unreadAdmin','unreadUser','status','topic']))
+        || isAdmin());
+      allow delete: if isAdmin();
+      match /messages/{mid} {
+        allow read: if signedIn() && (request.auth.uid == uid || isAdmin());
+        allow create: if signedIn() && (request.auth.uid == uid || isAdmin())
+          && request.resource.data.keys().hasOnly(['from','text','type','orderId','createdAt'])
+          && request.resource.data.text is string && request.resource.data.text.size() > 0 && request.resource.data.text.size() <= 1000
+          && request.resource.data.createdAt == request.time
+          && ((request.resource.data.from == 'admin') == isAdmin());
+        allow update: if false;
+        allow delete: if isAdmin();
+      }
+    }
+
+    match /{document=**} { allow read, write: if false; }
+  }
+}
