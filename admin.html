@@ -9,12 +9,13 @@
 <title>ShopNG Admin</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+<link rel="icon" type="image/png" href="./images/favicon.png">
 <link rel="stylesheet" href="./admin.css">
 </head>
 <body>
 <div id="gate" class="gate"></div>
 <div id="app" class="app" hidden>
-  <header class="top"><div class="brand"><i class="fas fa-gem"></i> ShopNG <span>Admin</span></div>
+  <header class="top"><div class="brand"><img src="./images/icon-192.png" alt="" width="30" height="30"> ShopNG <span>Admin</span></div>
     <div class="who"><button class="btn ghost sm" id="bell" data-act="alerts"><i class="fas fa-bell-slash"></i> Enable alerts</button><span id="whoEmail"></span><button class="btn ghost sm" data-act="signout"><i class="fas fa-sign-out-alt"></i></button></div></header>
   <nav class="tabs" id="tabs">
     <button data-tab="overview" class="on"><i class="fas fa-chart-pie"></i>Overview</button>
@@ -24,6 +25,7 @@
     <button data-tab="categories"><i class="fas fa-tags"></i>Categories</button>
     <button data-tab="flash"><i class="fas fa-bolt"></i>Flash Sale</button>
     <button data-tab="banners"><i class="fas fa-image"></i>Banners</button>
+    <button data-tab="reviews"><i class="fas fa-star"></i>Reviews</button>
     <button data-tab="coupons"><i class="fas fa-ticket-alt"></i>Coupons</button>
     <button data-tab="support"><i class="fas fa-headset"></i>Support <b id="supBadge" class="dotb" hidden>0</b></button>
   </nav>

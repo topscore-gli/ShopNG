@@ -99,3 +99,12 @@ Phones, tablets, laptops and big monitors: the layout adapts (multi-column produ
 - A pink **+1 / +2 …** badge appears on the **Profile** icon of the bottom bar when support replies; it clears when the customer opens the chat. Replies also arrive as a phone notification ("ShopNG Support") when the customer has turned notifications on.
 - Re-deploy because rules + functions changed: `firebase deploy --only functions,firestore:rules,storage`
 - The stylesheet is now `glass.v6.css` — delete the older `glass.v5.css` from your repo.
+
+---
+## Latest: logo, splash screen, reviews, sorting
+- **Logo**: your ShopNG logo (with a glass / water-drop finish) is now the splash screen, the home-screen/app icon, the notification icon, the browser tab icon and the admin logo. Replace the files in `images/` (`icon-192.png`, `icon-512.png`, `icon-maskable-512.png`, `apple-touch-icon.png`, `favicon.png`, `logo-glass.webp`) if you ever change it.
+- **Splash**: shows the logo with a shine for ~1.5 seconds while the shop loads.
+- **Reviews**: rating summary with bars; first 3 reviews shown, *See all* reveals the rest.
+- **Admin → Reviews**: search, filter by stars, and delete any review (the product's rating updates automatically).
+- **Search**: *Price: Low to High*, *High to Low* and *Top Rated* now sort all products even before typing, and also sort search results.
+- Stylesheet is now `glass.v7.css` — delete older `glass.v*.css` files from your repo.

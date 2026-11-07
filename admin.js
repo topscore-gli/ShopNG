@@ -9,7 +9,7 @@ const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const naira = n => "₦" + Math.round(Number(n) || 0).toLocaleString("en-NG");
 const STATUSES = ["Processing", "Shipped", "Out for Delivery", "Delivered", "Cancelled"];
-const S = { tab: "overview", products: [], categories: [], orders: [], users: [], banners: [], chats: [], coupons: [], flash: null, pq: "", pcat: "all", ofilter: "all", cq: "", unsubs: [], threadUnsub: null };
+const S = { tab: "overview", products: [], categories: [], orders: [], users: [], banners: [], chats: [], coupons: [], reviews: [], rq: "", rstar: "all", flash: null, pq: "", pcat: "all", ofilter: "all", cq: "", unsubs: [], threadUnsub: null };
 let F = null; // product form state
 const toDate = v => v && v.toDate ? v.toDate() : (v ? new Date(v) : null);
 const fmt = d => d ? d.toLocaleString("en-NG", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "-";
@@ -42,6 +42,7 @@ function startData() {
   sub("users", "users", d => ({ ...d.data(), uid: d.id }));
   sub("banners", "banners");
   sub("coupons", "coupons");
+  sub("reviews", "reviews", d => ({ ...d.data(), id: d.id }));
   sub("chats", "chats", d => ({ ...d.data(), uid: d.id }));
   S.unsubs.push(onSnapshot(doc(db, "settings", "flash"), s => { S.flash = s.exists() ? s.data() : null; render(); }, () => {}));
 }
@@ -229,9 +230,29 @@ async function enableAlerts(silent) {
 async function disableAlerts() { const t = localStorage.getItem("push_admin"); localStorage.removeItem("push_admin"); if (t) { try { await callF("unregisterPush")({ token: t, role: "admin" }); } catch (_) {} } }
 async function refreshBell() { const b = $("#bell"); if (!b) return; const st = await alertsStatus(); b.className = "btn sm " + (st === "on" ? "" : "ghost"); b.innerHTML = st === "on" ? '<i class="fas fa-bell"></i> Alerts on' : '<i class="fas fa-bell-slash"></i> Enable alerts'; }
 
+function vReviews() {
+  const nm = id => (S.products.find(p => p.id === id) || {}).name || "Deleted product";
+  const list = [...S.reviews].filter(r => (S.rstar === "all" || r.rating === Number(S.rstar)) && (!S.rq || (nm(r.productId) + " " + r.name + " " + r.text).toLowerCase().includes(S.rq.toLowerCase()))).sort((a, b) => (toDate(b.createdAt) || 0) - (toDate(a.createdAt) || 0));
+  const avg = S.reviews.length ? (S.reviews.reduce((a, r) => a + r.rating, 0) / S.reviews.length).toFixed(1) : "—";
+  return `<div class="grid g4" style="margin-bottom:12px"><div class="stat"><small>Total reviews</small><b>${S.reviews.length}</b></div><div class="stat"><small>Average rating</small><b>${avg} ★</b></div></div>
+  <div class="bar"><input id="rq" placeholder="Search reviews, products, customers…" value="${esc(S.rq)}"></div>
+  <div class="chips">${["all", 5, 4, 3, 2, 1].map(s => `<button data-rs="${s}" class="${String(S.rstar) === String(s) ? "on" : ""}">${s === "all" ? "All" : s + " ★"}</button>`).join("")}</div>
+  ${list.length ? list.map(r => `<div class="card" style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;gap:8px"><div><b>${esc(r.name)}</b> <span class="mut sm">· ${fmt(toDate(r.createdAt))}</span><div class="s mut sm">${esc(nm(r.productId))}</div></div><div style="color:#ffb547;white-space:nowrap">${"★".repeat(r.rating)}<span style="opacity:.3">${"★".repeat(5 - r.rating)}</span></div></div><p style="margin:10px 0">${esc(r.text)}</p><button class="btn bad sm" data-act="delrv" data-id="${esc(r.id)}"><i class="fas fa-trash"></i> Delete review</button></div>`).join("") : `<div class="card empty">No reviews here.</div>`}`;
+}
+async function deleteReview(id) {
+  const r = S.reviews.find(x => x.id === id); if (!r) return;
+  if (!confirm(`Delete ${r.name}'s ${r.rating}★ review? This cannot be undone.`)) return;
+  try {
+    await deleteDoc(doc(db, "reviews", id));
+    const rest = S.reviews.filter(x => x.productId === r.productId && x.id !== id), n = rest.length;
+    await updateDoc(doc(db, "products", String(r.productId)), { rating: n ? Math.round(rest.reduce((a, x) => a + x.rating, 0) / n * 10) / 10 : 0, reviews: n }).catch(() => {});
+    toast("Review deleted");
+  } catch (e) { toast("Failed: " + e.code, "err"); }
+}
+
 function render() {
   if ($("#app").hidden) return;
-  const v = { overview: vOverview, products: vProducts, orders: vOrders, customers: vCustomers, categories: vCategories, flash: vFlash, banners: vBanners, coupons: vCoupons, support: vSupport }[S.tab]();
+  const v = { overview: vOverview, products: vProducts, orders: vOrders, customers: vCustomers, categories: vCategories, flash: vFlash, banners: vBanners, coupons: vCoupons, reviews: vReviews, support: vSupport }[S.tab]();
   const sb = $("#supBadge"); if (sb) { const n = unreadCount(); sb.textContent = n; sb.hidden = !n; }
   const act = document.activeElement, keep = act && act.id, pos = act && act.selectionStart;
   $("#view").innerHTML = v;
@@ -350,7 +371,8 @@ function csv() {
 
 /* ---------- events ---------- */
 document.addEventListener("click", async e => {
-  const t = e.target.closest("[data-act],[data-tab],[data-pcat],[data-of]"); if (!t) return;
+  const t = e.target.closest("[data-act],[data-tab],[data-pcat],[data-of],[data-rs]"); if (!t) return;
+  if (t.dataset.rs) { S.rstar = t.dataset.rs; return render(); }
   if (t.dataset.tab) { S.tab = t.dataset.tab; return render(); }
   if (t.dataset.pcat) { S.pcat = t.dataset.pcat; return render(); }
   if (t.dataset.of) { S.ofilter = t.dataset.of; return render(); }
@@ -362,6 +384,7 @@ document.addEventListener("click", async e => {
     case "resend": try { await sendEmailVerification(auth.currentUser); toast("Verification email sent"); } catch (_) { toast("Try again later", "err"); } break;
     case "signout": stopData(); await disableAlerts(); await signOut(auth); break;
     case "addp": productForm(); break;
+    case "delrv": deleteReview(id); break;
     case "addcp": couponForm(); break;
     case "editcp": couponForm(S.coupons.find(c => c.code === id)); break;
     case "savecp": saveCoupon(); break;
@@ -407,6 +430,7 @@ document.addEventListener("input", e => {
   if (d && d.v !== undefined && F && F.variants) F.variants[+d.v][d.f] = e.target.value;
   if (e.target.id === "pq") { S.pq = e.target.value; render(); }
   if (e.target.id === "cq") { S.cq = e.target.value; render(); }
+  if (e.target.id === "rq") { S.rq = e.target.value; render(); }
 });
 document.addEventListener("change", e => {
   const k = e.target.dataset && e.target.dataset.slot;

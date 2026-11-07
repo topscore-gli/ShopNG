@@ -57,3 +57,4 @@ label{display:block;font-size:.72rem;font-weight:700;color:var(--mut);margin:12p
 .msg{max-width:82%;padding:9px 12px;border-radius:16px 16px 16px 4px;background:rgba(255,255,255,.1);font-size:.85rem;align-self:flex-start;word-break:break-word}.msg.me{align-self:flex-end;border-radius:16px 16px 4px 16px;background:linear-gradient(135deg,#a77bff,#6e42ec)}.msg small{display:block;opacity:.65;font-size:.65rem;margin-top:3px}
 @media(max-width:560px){.who{flex-wrap:wrap;justify-content:flex-end;max-width:62%}.who span{display:none}}
 @media(min-width:900px){main{max-width:1180px}.two{gap:14px}.sheet{max-width:720px}}
+.brand img{border-radius:9px;vertical-align:middle;margin-right:6px}

@@ -319,6 +319,13 @@ function filterByCategory(category) {
 }
 
 // Search
+function sortBySearchFilter(list) {
+    const f = AppState.searchFilter;
+    if (f === 'price-low') list.sort((a, b) => a.price - b.price);
+    else if (f === 'price-high') list.sort((a, b) => b.price - a.price);
+    else if (f === 'rating') list.sort((a, b) => b.rating - a.rating || b.reviews - a.reviews);
+    return list;
+}
 function renderSearch(query = '') {
     const input = document.getElementById('searchInput');
     if (input && query) input.value = query;
@@ -326,13 +333,18 @@ function renderSearch(query = '') {
     if (!resultsContainer) return;
     const searchQuery = query || (input ? input.value : '');
     if (!searchQuery.trim()) {
-        resultsContainer.innerHTML = `<div class="empty-state"><div class="empty-state-icon"><i class="fas fa-search"></i></div><h3>Search Products</h3><p>Search for products, brands, or categories.</p></div>`;
-        return;
+        const f = AppState.searchFilter;
+        if (f === 'all') {
+            resultsContainer.innerHTML = `<div class="empty-state"><div class="empty-state-icon"><i class="fas fa-search"></i></div><h3>Search Products</h3><p>Search for products, brands, or categories.</p></div>${relatedBlock(null, '', [])}`;
+            updateWishlistButtons(); return;
+        }
+        const all = sortBySearchFilter([...products]);
+        const label = { 'price-low': 'Lowest price first', 'price-high': 'Highest price first', 'rating': 'Top rated first' }[f];
+        resultsContainer.innerHTML = `<p class="text-muted" style="margin:4px 0 10px;">${all.length} product${all.length === 1 ? '' : 's'} · ${label}</p><div class="products-grid">${all.map(p => createProductCard(p)).join('')}</div>`;
+        updateWishlistButtons(); return;
     }
     let results = searchProducts(searchQuery);
-    if (AppState.searchFilter === 'price-low') results.sort((a, b) => a.price - b.price);
-    else if (AppState.searchFilter === 'price-high') results.sort((a, b) => b.price - a.price);
-    else if (AppState.searchFilter === 'rating') results.sort((a, b) => b.rating - a.rating);
+    results = sortBySearchFilter(results);
 
     if (results.length === 0) {
         resultsContainer.innerHTML = `<div class="empty-state"><div class="empty-state-icon"><i class="fas fa-search"></i></div><h3>No products found</h3><p>We couldn't find an exact match for "${esc(searchQuery)}". Try these instead:</p></div>${relatedBlock(null, searchQuery, [])}`;
@@ -465,18 +477,32 @@ async function loadProductReviews(product) {
     else if (canReview(product.id)) action = `<button class="neu-btn neu-btn-primary" onclick="openReview(${product.id})"><i class="fas fa-star"></i> ${mine ? 'Edit your review' : 'Write a review'}</button>`;
     else action = `<p class="text-muted review-note"><i class="fas fa-shield-alt"></i> Only customers who bought this product can review it.</p>`;
     const avg = list.length ? (list.reduce((s, r) => s + r.rating, 0) / list.length) : 0;
+    const dist = [5, 4, 3, 2, 1].map(n => list.filter(r => r.rating === n).length);
+    const card = r => `
+        <div class="review-card">
+            <div class="review-header">
+                <div class="review-avatar">${esc(r.name).charAt(0).toUpperCase()}</div>
+                <div class="review-meta"><div class="review-name">${esc(r.name)}</div><div class="review-date">${new Date(r.date).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}</div></div>
+                <div class="stars">${renderStars(r.rating)}</div>
+            </div>
+            <p class="review-text">${esc(r.text)}</p>
+            <span class="verified"><i class="fas fa-check-circle"></i> Verified buyer</span>
+        </div>`;
     box.innerHTML = `
-        ${list.length ? `<div class="review-summary"><div class="review-avg">${avg.toFixed(1)}</div><div><div class="stars">${renderStars(avg)}</div><div class="text-muted" style="font-size:.78rem">${list.length} verified review${list.length === 1 ? '' : 's'}</div></div></div>` : ''}
-        <div style="margin:10px 0 14px;">${action}</div>
-        ${list.length ? list.map(r => `
-            <div class="review-card">
-                <div class="review-header">
-                    <div class="review-avatar">${esc(r.name).charAt(0).toUpperCase()}</div>
-                    <div class="review-meta"><div class="review-name">${esc(r.name)} <span class="verified"><i class="fas fa-check-circle"></i> Verified buyer</span></div><div class="review-date">${new Date(r.date).toLocaleDateString()}</div></div>
-                    <div class="stars">${renderStars(r.rating)}</div>
-                </div>
-                <p class="review-text">${esc(r.text)}</p>
-            </div>`).join('') : '<p class="text-muted">No reviews yet — be the first after you buy!</p>'}`;
+        <div class="rv-summary">
+            <div class="rv-score"><div class="review-avg">${list.length ? avg.toFixed(1) : '—'}</div><div class="stars">${renderStars(avg)}</div><div class="rv-count">${list.length ? list.length + ' verified review' + (list.length === 1 ? '' : 's') : 'No reviews yet'}</div></div>
+            <div class="rv-bars">${dist.map((c, i) => `<div class="rv-row"><span>${5 - i}★</span><div class="rv-bar"><i style="width:${list.length ? Math.round(c / list.length * 100) : 0}%"></i></div><span>${c}</span></div>`).join('')}</div>
+        </div>
+        <div class="rv-action">${action}</div>
+        ${list.length ? `<div class="rv-list" id="rvList">${list.map((r, i) => `<div class="${i >= 3 ? 'rv-extra' : ''}">${card(r)}</div>`).join('')}</div>
+        ${list.length > 3 ? `<button class="rv-more" id="rvMore" onclick="toggleReviews()">See all ${list.length} reviews <i class="fas fa-chevron-down"></i></button>` : ''}`
+        : '<div class="rv-empty"><i class="far fa-comment-dots"></i><p>Be the first to share your experience after you buy this product.</p></div>'}`;
+}
+function toggleReviews() {
+    const l = document.getElementById('rvList'), b = document.getElementById('rvMore');
+    if (!l || !b) return;
+    const open = l.classList.toggle('show-all');
+    b.innerHTML = open ? 'Show less <i class="fas fa-chevron-up"></i>' : `See all ${l.children.length} reviews <i class="fas fa-chevron-down"></i>`;
 }
 function openReview(pid) {
     const p = getProductById(pid); if (!p) return;
@@ -1189,4 +1215,12 @@ async function maybeAskPush(reason) {
 }
 if (window.FB) FB.onPush = d => showToast(esc(d.title || 'ShopNG'), esc(d.body || ''), 'success', 6000);
 
-document.addEventListener('DOMContentLoaded', initApp);
+function hideSplash() {
+    const sp = document.getElementById('splash');
+    if (!sp || sp.dataset.done) return;
+    sp.dataset.done = '1';
+    const wait = Math.max(0, 1600 - performance.now());
+    setTimeout(() => { sp.classList.add('hide'); setTimeout(() => sp.remove(), 700); }, wait);
+}
+window.addEventListener('load', () => setTimeout(hideSplash, 6000));
+document.addEventListener('DOMContentLoaded', () => { initApp().catch(() => {}).finally(hideSplash); });
