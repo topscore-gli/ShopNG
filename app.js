@@ -194,29 +194,30 @@ function createProductCard(product, isFlash = false) {
 function createFlashCard(product) {
     const inWishlist = isInWishlist(product.id);
     const discount = getDiscountPercent(product.oldPrice, product.price);
+    const left = Math.max(0, Number(product.flashStock || product.stock) || 0);
+    const pct = Math.max(8, Math.min(100, left * 5));
     return `
         <div class="product-card flash-card" onclick="navigateTo('product', {id: ${product.id}})">
-            <div class="product-image-wrap">
+            <div class="product-image-wrap flash-img">
                 <img src="${product.image}" alt="${product.name}" class="product-image" loading="lazy">
-                ${discount > 0 ? `<span class="discount-badge" style="position:absolute;top:10px;left:10px;background:var(--secondary);color:white;font-size:0.6rem;font-weight:700;padding:3px 8px;border-radius:6px;">-${discount}%</span>` : ''}
+                ${discount > 0 ? `<span class="flash-off">-${discount}%</span>` : ''}
                 <button class="wishlist-btn ${inWishlist ? 'active' : ''}" data-id="${product.id}" onclick="event.stopPropagation(); toggleWishlist(${product.id})" aria-label="Wishlist">
                     <i class="${inWishlist ? 'fas' : 'far'} fa-heart"></i>
                 </button>
             </div>
             <div class="product-info">
                 <h3 class="product-name">${product.name}</h3>
-                <div class="product-price-row">
-                    <span class="current-price">${formatPrice(product.price)}</span>
+                <div class="flash-prices">
+                    <div>
+                        <span class="current-price">${formatPrice(product.price)}</span>
+                        ${product.oldPrice > product.price ? `<span class="flash-old">${formatPrice(product.oldPrice)}</span>` : ''}
+                    </div>
                     <button class="add-cart-btn" onclick="event.stopPropagation(); addToCart(${product.id}); this.classList.add('added'); setTimeout(()=>this.classList.remove('added'), 400)" aria-label="Add to cart">
                         <i class="fas fa-cart-plus"></i>
                     </button>
                 </div>
-                ${product.flashStock ? `
-                    <div class="stock-bar" style="height:3px;background:var(--border);border-radius:2px;margin-top:6px;overflow:hidden;">
-                        <div class="stock-fill" style="height:100%;background:linear-gradient(90deg,var(--secondary),#ff8e8e);border-radius:2px;width:${(product.flashStock/product.stock)*100}%;transition:width 0.5s;"></div>
-                    </div>
-                    <div style="font-size:0.6rem;color:var(--secondary);margin-top:3px;font-weight:600;">${product.flashStock} left</div>
-                ` : ''}
+                <div class="flash-stock"><div class="flash-stock-fill" style="width:${pct}%"></div></div>
+                <div class="flash-left">${left > 0 ? (left <= 20 ? `Only ${left} left` : 'Selling fast') : 'Sold out'}</div>
             </div>
         </div>`;
 }
@@ -254,6 +255,8 @@ function renderHome() {
     if (flashContainer) {
         const flash = getFlashProducts();
         flashContainer.innerHTML = flash.map(p => createFlashCard(p)).join('');
+        if (!flashContainer._bound) { flashContainer._bound = true; flashContainer.addEventListener('scroll', updateFlashArrows, { passive: true }); window.addEventListener('resize', updateFlashArrows); }
+        flashContainer.scrollLeft = 0; setTimeout(updateFlashArrows, 50);
         if (flashSec) flashSec.style.display = flash.length ? '' : 'none';
         const t = document.querySelector('#flashSection .flash-title h2');
         if (t && AppState.flash && AppState.flash.title) t.textContent = AppState.flash.title;
@@ -1151,6 +1154,20 @@ async function initApp() {
     if (qs.has('p') || qs.has('open')) history.replaceState(null, '', location.pathname);
 }
 
+function updateFlashArrows() {
+    const sc = document.getElementById('homeFlash'), tr = document.getElementById('flashTrack');
+    if (!sc || !tr) return;
+    tr.classList.toggle('at-start', sc.scrollLeft < 8);
+    tr.classList.toggle('at-end', sc.scrollLeft + sc.clientWidth >= sc.scrollWidth - 8);
+    tr.classList.toggle('no-scroll', sc.scrollWidth <= sc.clientWidth + 8);
+}
+function slideFlash(dir) {
+    const sc = document.getElementById('homeFlash');
+    if (!sc) return;
+    const card = sc.querySelector('.flash-card');
+    const step = (card ? card.offsetWidth + 14 : 200) * 1.6;
+    sc.scrollBy({ left: dir * step, behavior: 'smooth' });
+}
 function toggleCats() {
     const w = document.getElementById('catWrap'), b = document.getElementById('catFade');
     if (!w) return;

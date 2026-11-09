@@ -17,7 +17,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
     <link rel="stylesheet" href="./style.css?v=3">
-    <link rel="stylesheet" href="./glass.v7.css">
+    <link rel="stylesheet" href="./glass.v8.css">
 </head>
 <body>
     <div id="splash" aria-hidden="true">
@@ -141,8 +141,12 @@
                         <div class="countdown-box" id="flashSeconds">15</div>
                     </div>
                 </div>
-                <div class="flash-scroll" id="homeFlash">
+                <div class="flash-track" id="flashTrack">
+                    <button class="flash-arrow prev" onclick="slideFlash(-1)" aria-label="Previous deals"><i class="fas fa-chevron-left"></i></button>
+                    <div class="flash-scroll" id="homeFlash">
                     <!-- Rendered by JS -->
+                </div>
+                    <button class="flash-arrow next" onclick="slideFlash(1)" aria-label="More deals"><i class="fas fa-chevron-right"></i></button>
                 </div>
             </section>
 

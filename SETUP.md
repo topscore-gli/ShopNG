@@ -108,3 +108,5 @@ Phones, tablets, laptops and big monitors: the layout adapts (multi-column produ
 - **Admin → Reviews**: search, filter by stars, and delete any review (the product's rating updates automatically).
 - **Search**: *Price: Low to High*, *High to Low* and *Top Rated* now sort all products even before typing, and also sort search results.
 - Stylesheet is now `glass.v7.css` — delete older `glass.v*.css` files from your repo.
+
+- **Flash Sale slider**: wide cards (190px, 220px on laptops) with a big photo, discount badge, old price, stock bar and cart button. Swipe left/right on phones, or use the arrow buttons. Stylesheet is now `glass.v8.css` (delete older `glass.v*.css`).
