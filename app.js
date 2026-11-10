@@ -54,7 +54,7 @@ function addToCart(productId, qty = 1, color = null, size = null) {
     if (product.stock <= 0) { showToast('Out of Stock', `${product.name} is currently unavailable.`, 'error'); return; }
     const inCart = AppState.cart.filter(i => i.id === productId).reduce((s, i) => s + i.qty, 0);
     if (inCart + qty > product.stock) { showToast('Limited Stock', `Only ${product.stock} available.`, 'warning'); return; }
-    const existing = AppState.cart.find(item => item.id === productId && item.color === color && item.size === size);
+    const existing = AppState.cart.find(item => _sameLine(item, productId, color, size));
     if (existing) { existing.qty += qty; }
     else { AppState.cart.push({ id: productId, name: product.name, price: product.price, image: variantImage(product, color), qty, color, size }); }
     Storage.set('cart', AppState.cart);
@@ -62,16 +62,20 @@ function addToCart(productId, qty = 1, color = null, size = null) {
     showToast('Added to Cart', `${product.name} has been added to your cart.`, 'success');
 }
 
+function _nz(v) { return (v === undefined || v === null || v === 'null' || v === 'undefined' || v === '') ? null : v; }
+function _sameLine(item, productId, color, size) { return item.id === productId && _nz(item.color) === _nz(color) && _nz(item.size) === _nz(size); }
 function removeFromCart(productId, color, size) {
-    AppState.cart = AppState.cart.filter(item => !(item.id === productId && item.color === color && item.size === size));
+    AppState.cart = AppState.cart.filter(item => !_sameLine(item, productId, color, size));
     Storage.set('cart', AppState.cart);
     updateCartBadge();
     renderCart();
 }
 
 function updateCartQty(productId, color, size, delta) {
-    const item = AppState.cart.find(i => i.id === productId && i.color === color && i.size === size);
+    const item = AppState.cart.find(i => _sameLine(i, productId, color, size));
     if (!item) return;
+    const p = getProductById(productId);
+    if (delta > 0 && p && item.qty + delta > p.stock) { showToast('Limited Stock', `Only ${p.stock} available.`, 'warning'); return; }
     item.qty += delta;
     if (item.qty <= 0) { removeFromCart(productId, color, size); return; }
     Storage.set('cart', AppState.cart);
