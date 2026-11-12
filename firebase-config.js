@@ -11,7 +11,7 @@ _G.SHOP_CONFIG = {
   messagingSenderId: "407335196136",
   appId: "1:407335196136:web:df62d1f2de93304c6f405d"
 },
-  vapidKey: "YOUR_WEB_PUSH_VAPID_KEY",   // Firebase console → Project settings → Cloud Messaging → Web Push certificates
+  vapidKey: "oqPbvak_sjvrVRR745oRyLo_ioIqNYJZIi2KT_Joahg",   // Firebase console → Project settings → Cloud Messaging → Web Push certificates
   paystackPublicKey: "pk_test_12dc23595b033fcd963cdef7a632b7760f534b3e",
   functionsRegion: "us-central1",
   adminEmail: "shoplift.ng@gmail.com"   // only used to show/hide admin UI; real enforcement is in firestore.rules
