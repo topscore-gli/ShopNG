@@ -4,13 +4,13 @@
 const _G = typeof window !== "undefined" ? window : self;
 _G.SHOP_CONFIG = {
   firebase: {
-    apiKey: "YOUR_FIREBASE_API_KEY",
-    authDomain: "YOUR_PROJECT.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT.firebasestorage.app",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
-  },
+  apiKey: "AIzaSyABUZjD-t71MRMeEdg-bV8DJcDBkbtK_AQ",
+  authDomain: "shopng-3e645.firebaseapp.com",
+  projectId: "shopng-3e645",
+  storageBucket: "shopng-3e645.firebasestorage.app",
+  messagingSenderId: "407335196136",
+  appId: "1:407335196136:web:df62d1f2de93304c6f405d"
+},
   vapidKey: "YOUR_WEB_PUSH_VAPID_KEY",   // Firebase console → Project settings → Cloud Messaging → Web Push certificates
   paystackPublicKey: "pk_test_YOUR_PAYSTACK_PUBLIC_KEY",
   functionsRegion: "us-central1",
