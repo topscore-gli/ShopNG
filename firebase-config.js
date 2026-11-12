@@ -14,6 +14,6 @@ _G.SHOP_CONFIG = {
   vapidKey: "YOUR_WEB_PUSH_VAPID_KEY",   // Firebase console → Project settings → Cloud Messaging → Web Push certificates
   paystackPublicKey: "pk_test_YOUR_PAYSTACK_PUBLIC_KEY",
   functionsRegion: "us-central1",
-  adminEmail: "YOUR_ADMIN_EMAIL@gmail.com"   // only used to show/hide admin UI; real enforcement is in firestore.rules
+  adminEmail: "shoplift.ng@gmail.com"   // only used to show/hide admin UI; real enforcement is in firestore.rules
 };
 _G.SHOP_CONFIG.enabled = !/YOUR_/.test(_G.SHOP_CONFIG.firebase.apiKey + _G.SHOP_CONFIG.firebase.projectId);
