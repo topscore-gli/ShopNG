@@ -18,7 +18,7 @@ const PAYSTACK_SECRET = defineSecret("PAYSTACK_SECRET");
 // >>> KEEP IN SYNC: region = your Firestore location group; must equal functionsRegion in firebase-config.js
 const REGION = "us-central1";
 // >>> CHANGE to your admin email(s) (same as in firestore.rules). Must be a VERIFIED email.
-const ADMIN_EMAILS = ["YOUR_ADMIN_EMAIL@gmail.com"];
+const ADMIN_EMAILS = ["shoplift.ng@gmail.com"];
 
 const base = { region: REGION, maxInstances: 20 };
 const FV = admin.firestore.FieldValue;
